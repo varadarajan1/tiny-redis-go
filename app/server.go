@@ -34,5 +34,6 @@ func main() {
 		if err != nil {
 			fmt.Println("Write fialled with error: ", err.Error())
 		}
+		conn.Close()
 	}
 }

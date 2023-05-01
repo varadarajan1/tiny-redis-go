@@ -15,21 +15,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
-	}
-	defer conn.Close()
-	buf := make([]byte, 1024)
-	_, err = conn.Read(buf)
-	if err != nil {
-		fmt.Println("Error reading from connection")
-	}
-	fmt.Println("Received message", string(buf[:]))
-	resp := "+PONG\r\n"
-	_, err = conn.Write([]byte(resp))
-	if err != nil {
-		fmt.Println("Write fialled with error: ", err.Error())
+	defer l.Close()
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+		// go func(conn net.Conn) {
+		buf := make([]byte, 1024)
+		_, err = conn.Read(buf)
+		if err != nil {
+			fmt.Println("Error reading from connection")
+		}
+		fmt.Println("Received message", string(buf[:]))
+		resp := "+PONG\r\n"
+		_, err = conn.Write([]byte(resp))
+		if err != nil {
+			fmt.Println("Write fialled with error: ", err.Error())
+		}
+		conn.Close()
 	}
 }

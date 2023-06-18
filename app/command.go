@@ -2,10 +2,18 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"sync"
+	"time"
 )
 
 var hashmap = sync.Map{}
+
+type CacheEntry struct {
+	value  string
+	expiry int64
+}
 
 type Command interface {
 	ExecuteCommand()
@@ -55,7 +63,7 @@ type SetCommand struct {
 }
 
 func NewSetCommand(args []string, writer *Writer) (*SetCommand, error) {
-	if len(args) != 2 {
+	if len(args) < 2 || len(args) > 4 {
 		writer.WriteErrorResponseString("Invalid number of arguments for Set command")
 		return nil, fmt.Errorf("set command accepts only one argument")
 	}
@@ -63,7 +71,19 @@ func NewSetCommand(args []string, writer *Writer) (*SetCommand, error) {
 }
 
 func (p SetCommand) ExecuteCommand() {
-	hashmap.Store(p.args[0], p.args[1])
+	entry := CacheEntry{
+		value:  p.args[1],
+		expiry: -1,
+	}
+	if len(p.args) > 2 && strings.ToUpper(p.args[2]) == "PX" {
+		e, err := strconv.Atoi(p.args[3])
+		if err != nil {
+			p.writer.WriteErrorResponseString("Invalid expiry value")
+		}
+		entry.expiry = time.Now().UnixMilli() + int64(e)
+	}
+
+	hashmap.Store(p.args[0], entry)
 	p.writer.WriteResponseString("OK")
 }
 
@@ -82,7 +102,14 @@ func NewGetCommand(args []string, writer *Writer) (*GetCommand, error) {
 
 func (p GetCommand) ExecuteCommand() {
 	if value, ok := hashmap.Load(p.args[0]); ok {
-		p.writer.WriteBulkResponseString((value).(string))
+		entry := value.(CacheEntry)
+		fmt.Println("Expiry", entry.expiry)
+		if entry.expiry > -1 && time.Now().UnixMilli() > entry.expiry {
+			hashmap.Delete(p.args[0])
+			p.writer.WriteNilResponsString()
+			return
+		}
+		p.writer.WriteBulkResponseString(entry.value)
 		return
 	}
 	p.writer.WriteNilResponsString()

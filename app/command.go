@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
+
+var hashmap = sync.Map{}
 
 type Command interface {
 	ExecuteCommand()
@@ -58,7 +63,7 @@ func NewSetCommand(args []string, writer *Writer) (*SetCommand, error) {
 }
 
 func (p SetCommand) ExecuteCommand() {
-	Dictionary[p.args[0]] = p.args[1]
+	hashmap.Store(p.args[0], p.args[1])
 	p.writer.WriteResponseString("OK")
 }
 
@@ -76,8 +81,8 @@ func NewGetCommand(args []string, writer *Writer) (*GetCommand, error) {
 }
 
 func (p GetCommand) ExecuteCommand() {
-	if value, ok := Dictionary[p.args[0]]; ok {
-		p.writer.WriteBulkResponseString(value)
+	if value, ok := hashmap.Load(p.args[0]); ok {
+		p.writer.WriteBulkResponseString((value).(string))
 		return
 	}
 	p.writer.WriteNilResponsString()

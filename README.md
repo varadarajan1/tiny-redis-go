@@ -1,6 +1,6 @@
 # TINY REDIS GO
 
-This is a tiny implementation of redis I am building to learn more about redis and golang. This is still a work in progress.
+This is a tiny implementation of redis I am building to learn about redis and also explore golang.
 
 This project was bootrapped from Codecrafters' ["Build Your Own Redis" Challenge](https://codecrafters.io/challenges/redis). 
 

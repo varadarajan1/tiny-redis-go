@@ -12,10 +12,11 @@ import (
 const (
 	PING = "PING"
 	ECHO = "ECHO"
+	GET  = "GET"
+	SET  = "SET"
 )
 
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
@@ -82,13 +83,21 @@ func main() {
 					command, err = NewPingCommand(arguments, writer)
 					if err != nil {
 						fmt.Println(err.Error())
-						break
 					}
 				case ECHO:
 					command, err = NewEchoCommand(arguments, writer)
 					if err != nil {
 						fmt.Println(err.Error())
-						break
+					}
+				case GET:
+					command, err = NewGetCommand(arguments, writer)
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+				case SET:
+					command, err = NewSetCommand(arguments, writer)
+					if err != nil {
+						fmt.Println(err.Error())
 					}
 				}
 

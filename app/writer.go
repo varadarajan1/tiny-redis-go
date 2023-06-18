@@ -31,6 +31,12 @@ func (w Writer) WriteBulkResponseString(resp string) {
 	w.writer.Flush()
 }
 
+func (w Writer) WriteNilResponsString() {
+	response := "$-1" + "\r\n"
+	w.writer.Write([]byte(response))
+	w.writer.Flush()
+}
+
 func (w Writer) WriteErrorResponseString(resp string) {
 	response := "-" + resp + "\r\n"
 	w.writer.Write([]byte(response))

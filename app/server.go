@@ -58,8 +58,6 @@ func main() {
 
 				cmd, err := reader.ReadBulkString()
 
-				fmt.Println("Read command: ", cmd)
-
 				if err != nil {
 					fmt.Println("Unable to parse command", err.Error())
 					break

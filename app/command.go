@@ -103,7 +103,6 @@ func NewGetCommand(args []string, writer *Writer) (*GetCommand, error) {
 func (p GetCommand) ExecuteCommand() {
 	if value, ok := hashmap.Load(p.args[0]); ok {
 		entry := value.(CacheEntry)
-		fmt.Println("Expiry", entry.expiry)
 		if entry.expiry > -1 && time.Now().UnixMilli() > entry.expiry {
 			hashmap.Delete(p.args[0])
 			p.writer.WriteNilResponsString()
